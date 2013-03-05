@@ -9,8 +9,9 @@ namespace CollabTool.Web.Models
 	{
 		public Note()
 		{
-			// Generate Id
+			// Defaults
 			Id = Guid.NewGuid();
+			DateTime = DateTime.UtcNow;
 		}
 
 		/// <summary>

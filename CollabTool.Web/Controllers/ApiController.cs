@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Web.Mvc;
@@ -96,7 +95,7 @@ namespace CollabTool.Web.Controllers
 		/// <summary>
 		/// Get a collection of notes for the specified student from the inBloom data store
 		/// </summary>
-		private List<Note> GetStudentNotes(string studentId)
+		private NoteContainer GetStudentNotes(string studentId)
 		{
 			// Declare data
 			JArray data = null;
@@ -127,8 +126,12 @@ namespace CollabTool.Web.Controllers
 			// Convert JArray back to string so we can convert into strongly typed collection
 			var json = (data == null) ? string.Empty : data.ToString();
 
+			// Remove the array as we're only working with a single object
+			if (json.StartsWith("[") && json.EndsWith("]"))
+				json = json.Substring(1, json.Length - 2);
+
 			// Convert into strongly typed collection if possible
-			var notes = (!string.IsNullOrEmpty(json)) ? JsonConvert.DeserializeObject<List<Note>>(json) : new List<Note>();
+			var notes = (!string.IsNullOrEmpty(json)) ? JsonConvert.DeserializeObject<NoteContainer>(json) : new NoteContainer();
 
 			// All done, return it
 			return notes;
@@ -155,7 +158,7 @@ namespace CollabTool.Web.Controllers
 			var notes = GetStudentNotes(studentId);
 
 			// Add the new note to it
-			notes.Add(note);
+			notes.Notes.Add(note);
 
 			// Convert the list of note into JSON
 			var data = JsonConvert.SerializeObject(notes);
@@ -165,6 +168,12 @@ namespace CollabTool.Web.Controllers
 
 			// Return the new list
 			return Json(notes, JsonRequestBehavior.AllowGet);
+		}
+
+		public JsonResult AddTestNote(string studentId, string subject = "Test Subject")
+		{
+			var note = new Note {Subject = subject, Text = "This is a test body", SentimentType = SentimentType.Positive};
+			return AddNote(studentId, note);
 		}
 
 		#endregion
