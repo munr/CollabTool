@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Web.Mvc;
 using CollabTool.Web.Components;
 using CollabTool.Web.Models;
@@ -14,7 +15,14 @@ namespace CollabTool.Web.Controllers
 		public JsonResult GetStudents()
 		{
 			var service = new inBloomApiLibrary.GetStudentsData();
-			var students = service.GetStudents(SessionInfo.Current.AccessToken);
+			var array = service.GetStudents(SessionInfo.Current.AccessToken);
+			var students = (from dynamic token in array
+							select new Student
+							{
+								Id = token.id,
+								Name = string.Concat(token.name.firstName, " ", token.name.lastSurname)
+							});
+
 			return Json(students, JsonRequestBehavior.AllowGet);
 		}
 
@@ -32,7 +40,7 @@ namespace CollabTool.Web.Controllers
 		{
 			throw new NotImplementedException();
 		}
-
+		
 		public JsonResult AddNote(Note note)
 		{
 			throw new NotImplementedException();
