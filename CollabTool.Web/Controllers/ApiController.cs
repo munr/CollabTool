@@ -62,5 +62,25 @@ namespace CollabTool.Web.Controllers
 		{
 			throw new NotImplementedException();
 		}
+
+		/// <summary>
+		/// Get student attendance
+		/// </summary>
+		/// <param name="studentId"></param>
+		/// <returns></returns>
+		public JsonResult GetAttendance(string studentId)
+		{
+			throw new NotImplementedException();
+		}
+
+		/// <summary>
+		/// Get student test scores
+		/// </summary>
+		/// <param name="studentId"></param>
+		/// <returns></returns>
+		public JsonResult GetTestScores(string studentId)
+		{
+			throw new NotImplementedException();
+		}
 	}
 }
