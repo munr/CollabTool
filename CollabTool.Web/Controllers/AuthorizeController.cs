@@ -42,5 +42,20 @@ namespace CollabTool.Web.Controllers
 
 			return Content("Error authorizing");
 		}
+
+		public ActionResult LogOut()
+		{
+			// Init home service
+			var service = new GetHomeData();
+			
+			// Logout the current token
+			service.LogOut(SessionInfo.Current.AccessToken);
+
+			// Clear the session
+			Session.Abandon();
+			
+			// TODO: Redirect to login page
+			return RedirectToAction("Index", "Home");
+		}
 	}
 }

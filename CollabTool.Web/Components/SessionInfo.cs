@@ -41,7 +41,7 @@ namespace CollabTool.Web
 					return new SessionInfo();
 				}
 
-				return ForSession(HttpContext.Current.Session);
+				return ForSession(new HttpSessionStateWrapper(HttpContext.Current.Session));
 			}
 		}
 
@@ -78,7 +78,7 @@ namespace CollabTool.Web
 		/// <summary>
 		/// Gets the SessionInfo for the specified session
 		/// </summary>
-		public static SessionInfo ForSession(HttpSessionState session)
+		public static SessionInfo ForSession(HttpSessionStateBase session)
 		{
 			var sessionInfo = session[SessionKey] as SessionInfo;
 			if (sessionInfo == null)
