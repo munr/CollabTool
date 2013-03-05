@@ -22,6 +22,7 @@ namespace CollabTool.Web
 		public string AccessToken { get; set; }
 		public string FullName { get; set; }
 		public string Roles { get; set; }
+		public string PostLoginRedirectUrl { get; set; }
 
 		#endregion
 

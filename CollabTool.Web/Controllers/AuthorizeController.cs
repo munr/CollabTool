@@ -36,6 +36,15 @@ namespace CollabTool.Web.Controllers
 					SessionInfo.Current.Roles = oAuth.UserSLIRoles;
 					SessionInfo.Current.UserId = oAuth.UserId;
 
+					// Redirect to post login URL if one exists
+					if (!string.IsNullOrEmpty(SessionInfo.Current.PostLoginRedirectUrl))
+					{
+						var returnUrl = SessionInfo.Current.PostLoginRedirectUrl;
+						SessionInfo.Current.PostLoginRedirectUrl = null;
+						return Redirect(returnUrl);
+					}
+
+					// Otherwise, just go to home
 					return RedirectToAction("Index", "Home");
 				}
 			}

@@ -14,6 +14,10 @@ namespace CollabTool.Web.Components
 
 			if (sessionInfo == null || string.IsNullOrEmpty(sessionInfo.AccessToken))
 			{
+				// Store the return url
+				if (sessionInfo != null && filterContext.HttpContext != null && filterContext.HttpContext.Request != null && filterContext.HttpContext.Request.Url != null)
+					sessionInfo.PostLoginRedirectUrl = filterContext.HttpContext.Request.Url.ToString();
+
 				// Redirect to the authorize handler which in turn will send user to inBloom
 				filterContext.Result = new RedirectResult("~/Authorize");
 			}
