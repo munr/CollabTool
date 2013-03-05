@@ -28,7 +28,18 @@ namespace CollabTool.Web.Controllers
 
 		public JsonResult GetStudent(string studentId)
 		{
-			throw new NotImplementedException();
+			// First get the student demographics
+			var studentService = new inBloomApiLibrary.GetStudentsData();
+			var jsonStudentObj = studentService.GetStudentById(SessionInfo.Current.AccessToken, studentId);
+			dynamic objStudent = jsonStudentObj.FirstOrDefault() ?? new Object();
+
+			// Summarize data into single StudentDetail object
+			var studentDetail = new
+				{
+					Name = string.Concat(objStudent.name.firstName, " ", objStudent.name.lastSurname)
+				};
+
+			return Json(studentDetail, JsonRequestBehavior.AllowGet);
 		}
 
 		public JsonResult GetStudentDetail(string studentId)
@@ -41,7 +52,13 @@ namespace CollabTool.Web.Controllers
 			throw new NotImplementedException();
 		}
 		
-		public JsonResult AddNote(Note note)
+		/// <summary>
+		/// Add a new note to a student record
+		/// </summary>
+		/// <param name="studentId">The ID of the student to which the note should be added</param>
+		/// <param name="note">The note object to be added to the student</param>
+		/// <returns></returns>
+		public JsonResult AddNote(string studentId, Note note)
 		{
 			throw new NotImplementedException();
 		}
