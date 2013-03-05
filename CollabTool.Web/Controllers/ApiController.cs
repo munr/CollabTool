@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Web;
 using System.Web.Mvc;
 using CollabTool.Web.Components;
 using CollabTool.Web.Models;
@@ -20,6 +19,11 @@ namespace CollabTool.Web.Controllers
 	{
 		private readonly GetStudentsData _studentService = new GetStudentsData();
 
+		private string CurrentAccessToken
+		{
+			get { return SessionInfo.Current.AccessToken; }
+		}
+
 		#region Student List and Detail
 
 		/// <summary>
@@ -27,7 +31,7 @@ namespace CollabTool.Web.Controllers
 		/// </summary>
 		public JsonResult GetStudents()
 		{
-			var array = _studentService.GetStudents(SessionInfo.Current.AccessToken);
+			var array = _studentService.GetStudents(CurrentAccessToken);
 			var students = (from dynamic token in array
 			                select new Student
 				                {
@@ -44,7 +48,7 @@ namespace CollabTool.Web.Controllers
 		public JsonResult GetStudentDetail(string studentId)
 		{
 			// First get the student demographics
-			var jsonStudentObj = _studentService.GetStudentById(SessionInfo.Current.AccessToken, studentId);
+			var jsonStudentObj = _studentService.GetStudentById(CurrentAccessToken, studentId);
 			dynamic objStudent = jsonStudentObj.FirstOrDefault() ?? new Object();
 
 			// Summarize data into single StudentDetail object
@@ -70,7 +74,7 @@ namespace CollabTool.Web.Controllers
 		{
 			// No transformation required yet so just return whatever we got back from the inBloom API
 
-			return _studentService.GetStudentAttendances(SessionInfo.Current.AccessToken, studentId);
+			return _studentService.GetStudentAttendances(CurrentAccessToken, studentId);
 		}
 
 		/// <summary>
@@ -100,7 +104,7 @@ namespace CollabTool.Web.Controllers
 			try
 			{
 				// Try and get custom data from the inBloom API
-				data = _studentService.GetStudentCustom(SessionInfo.Current.AccessToken, studentId);
+				data = _studentService.GetStudentCustom(CurrentAccessToken, studentId);
 			}
 			catch (Exception ex)
 			{
@@ -157,7 +161,7 @@ namespace CollabTool.Web.Controllers
 			var data = JsonConvert.SerializeObject(notes);
 
 			// Save then notes back to the inBloom data store
-			_studentService.PutStudents(SessionInfo.Current.AccessToken, data, studentId);
+			_studentService.PutStudents(CurrentAccessToken, data, studentId);
 
 			// Return the new list
 			return Json(notes, JsonRequestBehavior.AllowGet);
