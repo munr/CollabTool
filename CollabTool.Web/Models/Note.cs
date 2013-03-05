@@ -19,6 +19,16 @@ namespace CollabTool.Web.Models
 		public Guid Id { get; set; }
 
 		/// <summary>
+		/// The note subject
+		/// </summary>
+		public string Subject { get; set; }
+
+		/// <summary>
+		/// The main note text
+		/// </summary>
+		public string Text { get; set; }
+
+		/// <summary>
 		/// Date and time that the note was saved
 		/// </summary>
 		public DateTime DateTime { get; set; }
