@@ -51,7 +51,7 @@ namespace CollabTool.Web.Models
 
 		/// <summary>
 		/// The type of note being saved
-		/// Eg. "Compliment" or  "Comment"
+		/// Eg. "Compliment", "Comment", or "Discipline"
 		/// Note, these values are fixed from the UI but stored as text in the inBloom data store
 		/// </summary>
 		public string NoteType { get; set; }
@@ -65,5 +65,30 @@ namespace CollabTool.Web.Models
 		/// List of recipients to whom the email notification was sent
 		/// </summary>
 		public string[] EmailRecipients { get; set; }
+		
+		#region Discipline Specific Fields
+		
+		/// <summary>
+		/// The location where the discipline incident took place
+		/// </summary>
+		public string Location { get; set; }
+		
+		/// <summary>
+		/// The date and time that the incident took place
+		/// Storing as text for ease of use (for now)
+		/// </summary>
+		public string IncidentTime { get; set; }
+		
+		/// <summary>
+		/// The type of behavior that caused this disciplinary incident
+		/// </summary>
+		public string BehaviorType { get; set ;}
+		
+		/// <summary>
+		/// Boolean value specifying whether this incident has been resolved
+		/// </summary>
+		public bool Resolved { get; set; }
+		
+		#endregion
 	}
 }
