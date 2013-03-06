@@ -41,46 +41,9 @@ namespace CollabTool.Web.Models
 
 		/// <summary>
 		/// The type of note being saved
-		/// Eg. "Behavior", "Peformance", etc
+		/// Eg. "Compliment" or  "Comment"
 		/// Note, these values are fixed from the UI but stored as text in the inBloom data store
 		/// </summary>
 		public string NoteType { get; set; }
-		
-		/// <summary>
-		/// Boolean value specifying whether an email notification was sent
-		/// </summary>
-		public bool SentEmail { get; set; }
-		
-		/// <summary>
-		/// List of recipients to whom the email notification was sent
-		/// </summary>
-		public string[] EmailRecipients { get; set; }
-		
-		/// <summary>
-		/// Sentiment type specifying the mood of the note
-		/// ie. Is it something positive, negative or neutral
-		/// </summary>
-		public SentimentType SentimentType { get; set; }
-	}
-
-	/// <summary>
-	/// Represents the sentiment type of a message
-	/// </summary>
-	public enum SentimentType
-	{
-		/// <summary>
-		/// Neutral; message is informative only
-		/// </summary>
-		Neutral = 0,
-
-		/// <summary>
-		/// Positive; note is about something positive that the student said or done
-		/// </summary>
-		Positive = 1,
-
-		/// <summary>
-		/// Negative; note is about something negative that the student said or done
-		/// </summary>
-		Negative = 2,
 	}
 }

@@ -139,6 +139,7 @@
     <Content Include="content\img\important.png" />
     <Content Include="content\img\inbloom-logo.png" />
     <Content Include="content\img\mail.png" />
+    <Content Include="content\img\mr_thompson.jpg" />
     <Content Include="content\img\search-icon.png" />
     <Content Include="content\img\speech_bubble_left_2.png" />
     <Content Include="content\img\speech_bubble_right_2.png" />

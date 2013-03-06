@@ -1,0 +1,246 @@
+<!doctype html>
+<html>
+<head>
+	<link rel="stylesheet" href="content/vendor/bootstrap/css/bootstrap.min.css"></link>
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.1/themes/base/jquery-ui.css"></link>
+	<link rel="stylesheet" href="content/vendor/select2/select2.css"></link>
+	<link rel="stylesheet" href="content/css/core.css"></link>
+	<link rel="stylesheet" href="content/css/collabTool.css"></link>
+</head>
+<body>
+	<div class="inbloom-header row-fluid">
+        <img id="inbloom-logo" src="content/img/inbloom-logo.png" alt="inBloom Logo" />                       
+        <div class="header-title">Collab</div>
+        <div style="float:right; margin-top:-0.5em">     
+            <span id="help-btn">help</span>
+	        <span id="logout-btn">log out</span>
+        </div>
+    </div>
+	<div id="container">
+		<div class="row-fluid main-row">
+			<div id="sidebar" class="span3">
+				<div id="sidebarBackground">
+				</div>
+				<div class="row-fluid">
+					<div id="studentListDiv" class="studentList">
+						<div id="searchBox">
+							<input id="txtStudentSearchBox" placeholder="search by name"/>
+							<img id="studentSearchIcon" src="content/img/search-icon.png" />	
+						</div>
+						<div>
+							<ul id="studentList">
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="content" class="span9">				
+				<div id="mainContent" class="row-fluid">
+					<div id="studentDetailsContainer">
+						<div id="studentDetailsBackground">
+						</div>
+						<div id="studentDetails">
+						</div>
+						<button id="addNoteBtn" class="btn btn-success">Add Note</button>
+						<div id="studentChartsCarousel" class="carousel slide" data-interval="false">
+						  <ol class="carousel-indicators">
+						    <li data-target="#studentChartsCarousel" data-slide-to="0" class="active"></li>
+						    <li data-target="#studentChartsCarousel" data-slide-to="1"></li>
+						    <li data-target="#studentChartsCarousel" data-slide-to="2"></li>
+						  </ol>
+						  <!-- Carousel items -->
+						  <div class="carousel-inner">
+						    <div class="active item">						    	
+								<div id="attendanceChart">
+								</div>
+						    </div>
+						    <div class="item">
+							    <div id="testScoresChart">
+								</div>
+						    </div>
+						    <div class="item">
+						    	<div id="disciplineDiv">
+							    	<h2>Disciplinary Incidents</h2>
+							    	<div id="disciplineChart">
+							    	</div>
+							    	<img id="timeline" src="content/img/timeline.png"/>
+						    	</div>
+						    </div>
+						  </div>
+						  <!-- Carousel nav -->
+						  <a class="carousel-control left" href="#studentChartsCarousel" data-slide="prev">&lsaquo;</a>
+						  <a class="carousel-control right" href="#studentChartsCarousel" data-slide="next">&rsaquo;</a>
+						</div>
+					</div>					
+					<div id="studentNotesContainer">												
+						<div>
+							<div>
+								<div id="notesSearchBox" class="display-inline">
+									<input id="txtNotesSearchBox" type="text" placeholder="Search for..." />
+									<img id="notesSearchIcon" src="content/img/search-icon.png" />
+								</div>
+								<div id="notesFilters" class="display-inline">
+									Filters:
+									<img data-rank="discipline" class="noteRankFilterIcon" src="content/img/important.png"/>
+									<img data-rank="comment" class="noteRankFilterIcon" src="content/img/status_message.png"/>
+									<img data-rank="compliment" class="noteRankFilterIcon" src="content/img/arrow_up.png"/>
+								</div>
+							</div>
+						</div>
+						<div id="studentNotes">
+						</div>
+					</div>
+				</div>
+				<div id="newNoteForm">
+					<button id="closeNewNoteFormBtn" class="btn btn-danger">close</button>
+					<div id="newNoteFormContent">
+						<div style="text-align:center">
+							<h2>Log Note</h2>
+						</div>
+						<div class="newNoteField discipline compliment comment">
+							<span class="newNoteFieldLabel">Type:</span>
+							<select id="newNoteRankDropdown" class="apply-select2">
+								<option value="discipline">Discipline</option>
+								<option value="comment">Comment</option>
+								<option value="compliment">Compliment</option>
+							</select>
+						</div>
+						<div class="newNoteField disciplie compliment comment">
+							<span class="newNoteFieldLabel">Title:</span>
+							<input id="newNoteTitleTxt" type="text" maxlength="20"/>
+						</div>
+						<div class="newNoteField discipline compliment comment flag">
+							<span class="newNoteFieldLabel">Description:</span>
+							<textarea id="newNoteDescription"></textarea>
+						</div>
+						<div class="newNoteField discipline">
+							<span class="newNoteFieldLabel">Location:</span>
+							<select id="newNoteLocation" class="apply-select2">
+								<option>On School</option>
+								<option>Cafeteria Area</option>
+								<option>Classroom</option>
+								<option>Hallway</option>
+								<option>Restroom</option>
+							</select>
+						</div>
+						<div class="newNoteField discipline">
+							<span class="newNoteFieldLabel">Date/time:</span>
+							<input id="newNoteDateTime" type="text"/>
+						</div>
+						<div class="newNoteField discipline">
+							<span class="newNoteFieldLabel">Behavior Type:</span>
+							<select id="newNoteBehaviorType" class="apply-select2">
+								<option>State Law Crime</option>
+								<option>State Offense</option>
+								<option>School Violation</option>
+								<option>School Code of Conduct</option>
+							</select>
+						</div>
+						<div class="newNoteField flag">
+							<span class="newNoteFieldLabel">Date resolved:</span>
+							<input type="text"/>
+						</div>
+						<div style="text-align:center">
+							<button id="saveNewNoteBtn" class="btn btn-primary">Save</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Handlebars Templates -->
+	<script id="studentListItemTemplate" type="text/x-handlebars-template">
+		<li data-student-id="{{studentId}}" class="studentListItem">
+			<img src="{{studentIconUrl}}" class="studentListItemIcon display-inline"/>
+			{{#if hasAlerts}}			
+				<img class="studentAlertIcon" src="content/img/important.png"/>
+			{{/if}}
+			<div class="studentListItemData">
+				<div>{{studentName}}</div>
+				<div>{{gradeLevel}}</div>
+				<hr class="studentLineDivider"/>
+			</div>
+		</li>
+	</script>
+
+	<script id="studentDetailsTemplate" type="text/x-handlebars-template">
+		<div id="studentInfo">
+			<div class="display-inline userDetailIcon"><img src="{{studentIconUrl}}"/></div>
+			<div class="display-inline userDetailInfo">
+				<div>{{studentName}}</div>
+				<div>GPA: {{gpa}}</div>
+				<div>Grade Level: {{gradeLevel}}</div>
+				<div>Disabilities: {{disabilities}}</div>
+				<div>Limited English Proficiency: {{limitedEnglishProficiency}}</div>
+			</div>
+		</div>
+	</script>
+
+	<script id="studentNoteTemplate" type="text/x-handlebars-template">
+		<div class="studentNote">			
+			<div class="studentNoteInner {{notePosition}}">
+				{{#if left}}
+					<div class="studentNoteIcons">
+						<img src="{{userIconUrl}}" alt="{{userIconTitle}}" title="{{userIconTitle}}" class="userIcon {{imagePosition}}"/>
+						<img src="{{rankUrl}}" class="rankIconLeft"/>
+					</div>
+				{{/if}}
+				<div class="display-inline messageBlock">
+					<div>
+						<b>{{noteTitle}}</b>
+						{{#if didSendEmail}}
+							<img class="studentNoteIcon mailIcon" src="content/img/mail.png"/>
+						{{/if}}
+						<span class="noteTimestamp">
+							<b>{{userName}}</b>  {{noteTimestamp}}
+						</span>
+					</div>
+					<div>
+						{{noteText}}
+					</div>
+				</div>
+				{{#if right}}
+					<div class="studentNoteIcons">
+						<img src="{{userIconUrl}}" alt="{{userIconTitle}}" title="{{userIconTitle}}" class="userIcon {{imagePosition}}"/>
+						<img src="{{rankUrl}}" class="rankIconRight"/>
+					</div>
+				{{/if}}
+			</div>										
+			<div class="removeNoteBtn closeBtns{{notePosition}}">
+				x
+			</div>	
+		</div>
+	</script>
+
+	<script id="studentDisciplineObject" type="text/x-handlebars-template">
+		<div class="studentDisciplineObjectContainer">
+			<div class="studentDisciplineObject {{color}}">	
+			</div>
+			<div class="studentDisciplineIncidentTime">
+				{{incidentTime}}
+			</div>
+		</div>
+	</script>
+
+	<script id="studentDisciplineObjectTooltip" type="text/x-handlebars-template">
+		<div>
+			<b>{{behaviorType}} at {{location}}</b>
+		</div>
+		<div>
+			{{noteText}}
+		</div>
+	</script>
+	<!--  Third party   -->
+	<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+	<script src="http://code.jquery.com/ui/1.10.1/jquery-ui.js"></script>
+	<script src="content/vendor/bootstrap/js/bootstrap.min.js"></script>
+	<script src="content/vendor/underscore/underscore.min.js"></script>
+	<script src="content/vendor/select2/select2.min.js"></script>
+	<script src="content/vendor/handlebars/handlebars.js"></script>
+	<script src="content/vendor/highcharts/highcharts.js"></script>
+
+	<!-- Custom JS Code -->
+	<script src="content/js/collabTool.js"></script>
+</body>
+</html>

@@ -1,0 +1,314 @@
+/*     SIDEBAR       */
+#container {
+	padding-top:1em;
+	background: #FFFFFF;
+	position:absolute;
+	width:100%;
+	height:100%;
+}
+.main-row {
+	position:relative;
+	height:100%;
+	width:100%;
+}
+#sidebar {
+	display:block;
+	height:100%;
+	position: relative;
+	border-right:1.5px solid;
+}
+#sidebarBackground {
+	position:absolute;
+	height:100%;
+	width:100%;
+}
+#searchBox {
+	position:relative;
+	padding-top:0.3em;
+}
+#txtStudentSearchBox {
+	width:96%;
+	border-radius: 0.3em;
+}
+#studentSearchIcon {
+	position:absolute;
+	left:80%;
+	top:0.4em;
+	width:1.6em;
+}
+.studentList {
+	padding-left:0.3em;
+	padding-right:0.3em;
+	position:absolute;
+	z-index: 2;
+	width:98%;
+}
+#studentList {
+	margin-left:0;
+}
+.studentListItem {	
+	position: relative;
+	cursor:pointer;
+	list-style: none;
+    margin: 0.8em auto auto auto;
+}
+.studentListItemIcon {
+	width:3em;
+}
+.studentAlertIcon {
+	position:absolute;
+	top:0;
+	left:100%;
+}
+.studentListItemData {
+	display:inline-block;
+	width:70%;
+	vertical-align: top;
+}
+.studentLineDivider {
+	border-bottom: 1.5px solid #999999;
+}
+
+/*     CONTENT      */
+#content {
+	position:relative;
+	padding-right:0.8em;
+	height:100%;
+}
+#mainContent {
+	position:absolute;
+	z-index:2;
+}
+#buttonsBar {
+	position:absolute;
+	margin-top:-2em;
+}
+
+/* USER DETAILS  */
+#studentDetailsContainer {
+	position:relative;
+	min-height:14em;
+}
+#studentDetailsBackground {
+	position:absolute;
+	height: 100%;
+	width:100%;
+}
+#studentDetails {
+	position:relative;
+	z-index: 2;
+}
+#studentChartsCarousel {
+	padding-left:4em;
+}
+#studentInfo {
+	vertical-align: top;
+	
+}
+.userDetailIcon {
+	vertical-align: top;
+}
+.userDetailInfo {
+}
+#testScoresChart {
+	height:220px;
+	width:600px;
+}
+#attendanceChart {
+	height:220px;
+	width:600px;
+}
+#disciplineDiv {
+	height:220px;
+	padding-left:2em;
+}
+
+/* NEW NOTE FORM */
+#newNoteForm {
+	display:none;
+	position: absolute;
+	width: 100%;
+	height:100%;
+	z-index:4;
+}
+#newNoteFormContent {
+	position: absolute;
+	left:20%;
+}
+
+/* STUDENT NOTES */
+#notesSearchBox {
+	position:relative;
+}
+#notesSearchIcon {
+	position:absolute;
+	left:85%;
+	top:0;
+}
+#addNoteBtn {
+	position:absolute;
+	top:0;
+	left:80%;
+	width:10em;
+	z-index:2;
+}
+#studentNotesContainer {	
+	position:relative;
+	height:26em;
+	margin-top:2em;
+	padding:0.6em;
+}
+#notesFilters {
+	position:absolute;
+	left:80%;
+}
+#studentNotes {
+}
+.studentNote {
+	position:relative;
+	min-height: 2em;
+}
+.studentNoteIcons {
+	position:relative;
+	display:inline-block;
+}
+.userIcon {
+	width:4em;
+}
+.rankIconLeft, .rankIconRight {
+	position: absolute;
+	width:2.5em;
+	margin-top: -1em;
+	cursor:pointer;
+}
+.rankIconLeft {
+	top:0;
+	left:60%;
+}
+.rankIconRight {
+	top:0;
+	left:0;	
+}
+.noteRankIcon, .noteRankFilterIcon {
+	width:2em;
+}
+.noteTimestamp {
+	font-style: italic;
+	font-size:smaller;
+	float:right;
+}
+.rankSelected {
+	border:1px solid red;
+}
+.messageBlock {
+	width:80%;
+	padding:1.5em;
+}
+.studentNoteIcon {
+	width:1.5em;
+}
+.studentNoteInner {
+	display:inline-block;
+}
+.studentNoteInner.Right {
+	float:right;
+}
+.closeBtnsLeft {
+	cursor: pointer;
+	position:absolute;
+	left:95%;
+	top:30%;
+}
+.closeBtnsRight {
+	cursor:pointer;
+	position:absolute;
+	top:70%;
+}
+
+/*     NEW NOTE DIV      */
+#newNoteDiv {
+	display:none;
+	background-color:#333;
+	position:relative;
+	
+	padding:0.6em;
+}
+#newNoteDiv:after {
+	content: ' ';
+	height: 0;
+	position: absolute;
+	width: 0;
+
+	border: 20px solid transparent;
+	border-bottom-color: #333;
+	bottom: 100%;
+	left: 50%;
+}
+.newNoteLbl {
+	width:5em;
+	display:inline-block;
+}
+.newNoteBtns {
+	float:right;
+	vertical-align: bottom;
+}
+.rankSection {
+	margin-left:2em;
+	display:inline-block;
+	vertical-align: top;
+}
+.newNoteFieldLabel {
+	width: 10em;
+	margin-right:1em;
+	display:inline-block;
+	text-align:right;
+}
+
+/* STUDENT DISCIPLINE */
+#disciplineChart {
+	padding:5em;
+}
+.studentDisciplineObjectContainer {
+	display: inline-block;
+	margin-right: 1em;
+	text-align: center;
+}
+.studentDisciplineObject {
+	border-radius: 50%;
+	height:2em;
+	width:2em;
+	display: inline-block;
+}
+.studentDisciplineObject.red {
+	background-color:red;
+}
+.studentDisciplineObject.blue {
+	background-color:blue;	
+}
+.studentDisciplineObject.orange {
+	background-color:orange;	
+}
+.studentDisciplineObject.green {
+	background-color:green;	
+}
+.studentDisciplineObjectTooltip {
+	font-size:medium;
+}
+.studentDisciplineIncidentTime {
+	margin-top: 2em;
+}
+#timeline {
+	position:absolute;
+	margin-top:-8em;
+}
+
+/*	UTILITY CLASSES  */
+.align-center {
+	text-align: center;
+}
+.display-inline {
+	display: inline-block;
+}
+.fr {
+	float:right;
+}

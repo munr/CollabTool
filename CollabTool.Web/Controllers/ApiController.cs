@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Web.Mvc;
@@ -18,6 +19,9 @@ namespace CollabTool.Web.Controllers
 	{
 		private readonly GetStudentsData _studentService = new GetStudentsData();
 
+		/// <summary>
+		/// Shortcut to the current session token
+		/// </summary>
 		private string CurrentAccessToken
 		{
 			get { return SessionInfo.Current.AccessToken; }
@@ -35,7 +39,9 @@ namespace CollabTool.Web.Controllers
 			                select new Student
 				                {
 					                Id = token.id,
-					                Name = string.Concat(token.name.firstName, " ", token.name.lastSurname)
+					                Name = string.Concat(token.name.firstName, " ", token.name.lastSurname),
+									Class = "Mathematics 101",	// TODO: Get from API
+									Grade = "8th Grade"			// TODO: Get from API
 				                });
 
 			return Json(students, JsonRequestBehavior.AllowGet);
@@ -53,8 +59,12 @@ namespace CollabTool.Web.Controllers
 			// Summarize data into single StudentDetail object
 			var studentDetail = new
 				{
-					Name = string.Concat(objStudent.name.firstName, " ", objStudent.name.lastSurname)
-					// TODO: Add more demographics here
+					Name = string.Concat(objStudent.name.firstName, " ", objStudent.name.lastSurname),
+					GPA = 3.7,								// TODO: Get from API
+					Classes = "Math 101, English 102",		// TODO: Get from API
+					GradeLevel = "8th Grade",				// TODO: Get from API
+					LimitedEnglish = "Limited",					// TODO: Get from API this is not a boolean
+					Disabilities = "None"					// TODO: Get from API
 				};
 
 			return Json(studentDetail, JsonRequestBehavior.AllowGet);
@@ -154,6 +164,9 @@ namespace CollabTool.Web.Controllers
 		/// <returns></returns>
 		public JsonResult AddNote(string studentId, Note note)
 		{
+			// Set internal properties
+			note.TeacherId = SessionInfo.Current.UserId;
+
 			// Get the existing student notes
 			var notes = GetStudentNotes(studentId);
 
@@ -163,17 +176,97 @@ namespace CollabTool.Web.Controllers
 			// Convert the list of note into JSON
 			var data = JsonConvert.SerializeObject(notes);
 
-			// Save then notes back to the inBloom data store
+			// Save then note back to the inBloom data store
 			_studentService.PutStudents(CurrentAccessToken, data, studentId);
 
 			// Return the new list
 			return Json(notes, JsonRequestBehavior.AllowGet);
 		}
 
-		public JsonResult AddTestNote(string studentId, string subject = "Test Subject")
+		public JsonResult DeleteNote(string studentId, string noteId)
 		{
-			var note = new Note {Subject = subject, Text = "This is a test body", SentimentType = SentimentType.Positive};
-			return AddNote(studentId, note);
+			// Get the existing student notes
+			var notes = GetStudentNotes(studentId);
+
+			// Remove the note
+			notes.Notes.RemoveAll(x => x.Id.ToString() == noteId);
+
+			// Convert the list of note into JSON
+			var data = JsonConvert.SerializeObject(notes);
+
+			// Save the note notes back to the inBloom data store
+			_studentService.PutStudents(CurrentAccessToken, data, studentId);
+
+			// Return the new list
+			return Json(notes, JsonRequestBehavior.AllowGet);
+		}
+
+		#endregion
+
+		#region Discipline incident and action
+
+		/// <summary>
+		/// Add a new discipline incident to a student
+		/// </summary>
+		public JsonResult AddDisciplineIncident(string studentId, DisciplineIncident disciplineIncident)
+		{
+			try
+			{
+				// TODO: This might need to be user-entered but use random string for now
+				var incidentIdentifier = Guid.NewGuid().ToString().Split('-').First();
+
+				// Get the student school id
+				dynamic student = _studentService.GetStudentById(CurrentAccessToken, studentId);
+
+				// Setup the data we need to post to create the incident
+				var obj = new { incidentIdentifier, student.schoolId };
+
+				// Post the discipline incident
+				var service = new GetDisciplineData();
+				var response = service.PostDisciplineIncidents(CurrentAccessToken, JsonConvert.SerializeObject(obj));
+
+				Debug.WriteLine("Created discipline incident: " + response);
+
+				return Json(new { success = true, incidentIdentifier, message = "Added discipline incident successfully" }, JsonRequestBehavior.AllowGet);
+			}
+			catch (Exception e)
+			{
+				Debug.WriteLine("Error adding discipline incident: " + e);
+				return Json(new { success = false, message = e.Message }, JsonRequestBehavior.AllowGet);
+			}
+		}
+
+		/// <summary>
+		/// Add a new discipline action to a discipline incident
+		/// </summary>
+		public JsonResult AddDisciplineAction(string studentId, string disciplineActionIdentifier, DisciplineAction disciplineAction)
+		{
+			try
+			{
+				// Setup the data we need to post to create the incident
+				// https://inbloom.org/sites/default/files/docs-developer-1.0.68-20130118/ch-data_model-entities.html#type-DisciplineAction
+				// https://inbloom.org/sites/default/files/docs-developer-1.0.68-20130118/ch-data_model-entities.html#type-DisciplineDescriptorType
+
+				var obj = new
+					{
+						disciplineActionIdentifier,
+						disciplineDate = disciplineAction.DateTime,
+						disciplines = new { shortDescription = disciplineAction.ShortDescription, description = disciplineAction.Description }
+					};
+
+				// Post the discipline incident
+				var service = new GetDisciplineData();
+				var response = service.PostDisciplineActions(CurrentAccessToken, JsonConvert.SerializeObject(obj));
+
+				Debug.WriteLine("Created discipline action: " + response);
+
+				return Json(new { success = true, message = "Added discipline action successfully" }, JsonRequestBehavior.AllowGet);
+			}
+			catch (Exception e)
+			{
+				Debug.WriteLine("Error adding discipline action: " + e);
+				return Json(new { success = false, message = e.Message }, JsonRequestBehavior.AllowGet);
+			}
 		}
 
 		#endregion
@@ -207,16 +300,16 @@ namespace CollabTool.Web.Controllers
             {
                 for (var y = 0; y < attendanceCount.Count; y++)
                 {
-                    if(agroup[x].Key.ToString() == attendanceCount[y]["event"].ToString())
-                    attendanceCount[y]["count"] = agroup[x].Count();
+                    if (agroup[x].Key.ToString() == attendanceCount[y]["event"].ToString())
+                        attendanceCount[y]["count"] = agroup[x].Count();
                 }
             }
 
             return Json(attendanceCount, JsonRequestBehavior.AllowGet);
         }
 
-        
+
 
         #endregion
-    }
+	}
 }
