@@ -163,7 +163,25 @@ namespace CollabTool.Web.Controllers
 			// Convert the list of note into JSON
 			var data = JsonConvert.SerializeObject(notes);
 
-			// Save then notes back to the inBloom data store
+			// Save then note back to the inBloom data store
+			_studentService.PutStudents(CurrentAccessToken, data, studentId);
+
+			// Return the new list
+			return Json(notes, JsonRequestBehavior.AllowGet);
+		}
+
+		public JsonResult DeleteNote(string studentId, string noteId)
+		{
+			// Get the existing student notes
+			var notes = GetStudentNotes(studentId);
+
+			// Remove the note
+			notes.Notes.RemoveAll(x => x.Id.ToString() == noteId);
+
+			// Convert the list of note into JSON
+			var data = JsonConvert.SerializeObject(notes);
+
+			// Save the note notes back to the inBloom data store
 			_studentService.PutStudents(CurrentAccessToken, data, studentId);
 
 			// Return the new list
