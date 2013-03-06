@@ -160,6 +160,26 @@ namespace CollabTool.Web.Controllers
 			// Convert into strongly typed collection if possible
 			var notes = (!string.IsNullOrEmpty(json)) ? JsonConvert.DeserializeObject<NoteContainer>(json) : new NoteContainer();
 
+			// Now set teacher names
+			foreach (var note in notes.Notes)
+			{
+				// Get the teacher ID
+				var teacherId = note.TeacherId;
+
+				// Set missing teacher names to "unknown"
+				// Should never occur, but just in case we hit test data
+				if (string.IsNullOrEmpty(teacherId))
+				{
+					note.TeacherName = "Unknown";
+					continue;
+				}
+
+				// Otherwise, we have a teacher ID so use it to get the teacher name
+				var teacherService = new GetTeachersData();
+				dynamic teacher = teacherService.GetTeacherById(CurrentAccessToken, note.TeacherId)[0];
+				note.TeacherName = string.Concat(teacher.name.firstName, " ", teacher.name.lastSurname);
+			}
+
 			if (includeDisciplineIncidents)
 			{
 				var disciplineService = new GetDisciplineData();
@@ -173,6 +193,9 @@ namespace CollabTool.Web.Controllers
 				{
 					string disciplineIncidentId = association.disciplineIncidentId;
 					dynamic disciplineIncident = disciplineService.GetDisciplineIncidentById(CurrentAccessToken, disciplineIncidentId);
+
+					// Discipline incidents can contain multiple actions.
+					// How do we convert this into a note - there's no simple way to convert
 				}
 
 				// 3. Convert incidents into note objects and add to notes

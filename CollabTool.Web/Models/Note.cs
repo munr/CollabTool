@@ -45,6 +45,11 @@ namespace CollabTool.Web.Models
 		public string TeacherId { get; set; }
 
 		/// <summary>
+		/// The name of the teacher who made the note
+		/// </summary>
+		public string TeacherName { get; set; }
+
+		/// <summary>
 		/// The type of note being saved
 		/// Eg. "Compliment" or  "Comment"
 		/// Note, these values are fixed from the UI but stored as text in the inBloom data store
