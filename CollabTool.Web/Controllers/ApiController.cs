@@ -8,6 +8,7 @@ using CollabTool.Web.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using inBloomApiLibrary;
+using System.Collections.Generic;
 
 namespace CollabTool.Web.Controllers
 {
@@ -301,17 +302,24 @@ namespace CollabTool.Web.Controllers
 					events = year;
 			}
 			var agroup = events.GroupBy(x => x["event"]).ToList();
-			JArray attendanceCount = JArray.Parse("[{'event': 'In Attendance', 'count':'0'},{'event': 'Excused Absence', 'count':'0'},{'event': 'Unexcused Absence', 'count':'0'},{'event': 'Tardy', 'count':'0'},{'event': 'Early departure', 'count':'0'}]");
-			for (var x = 0; x < agroup.Count; x++)
+            List<AttendanceItem> attendanceCount = new List<AttendanceItem>();
+			//JArray attendanceCount = JArray.Parse("[{'event': 'In Attendance', 'count':'0'},{'event': 'Excused Absence', 'count':'0'},{'event': 'Unexcused Absence', 'count':'0'},{'event': 'Tardy', 'count':'0'},{'event': 'Early departure', 'count':'0'}]");
+			attendanceCount.Add(new AttendanceItem("In Attendance", 0));
+                attendanceCount.Add(new AttendanceItem("Excused Absence", 0));
+                attendanceCount.Add(new AttendanceItem("Unexcused Absence", 0));
+                attendanceCount.Add(new AttendanceItem("Tardy", 0));
+                attendanceCount.Add(new AttendanceItem("Early departure", 0));
+
+            for (var x = 0; x < agroup.Count; x++)
 			{
 				for (var y = 0; y < attendanceCount.Count; y++)
-				{
-					if (agroup[x].Key.ToString() == attendanceCount[y]["event"].ToString())
-						attendanceCount[y]["count"] = agroup[x].Count();
+				{                   
+					if (agroup[x].Key.ToString() == attendanceCount[y].name)
+						attendanceCount[y].value = agroup[x].Count();
 				}
 			}
 
-			return Json(attendanceCount, JsonRequestBehavior.AllowGet);
+            return Json(attendanceCount, JsonRequestBehavior.AllowGet);
 		}
 
 
