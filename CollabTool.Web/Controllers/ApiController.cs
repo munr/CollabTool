@@ -122,7 +122,7 @@ namespace CollabTool.Web.Controllers
 		/// <summary>
 		/// Get a collection of notes for the specified student from the inBloom data store
 		/// </summary>
-		private NoteContainer GetStudentNotes(string studentId)
+		private NoteContainer GetStudentNotes(string studentId, bool includeDisciplineIncidents)
 		{
 			// Declare data
 			JArray data = null;
@@ -160,6 +160,13 @@ namespace CollabTool.Web.Controllers
 			// Convert into strongly typed collection if possible
 			var notes = (!string.IsNullOrEmpty(json)) ? JsonConvert.DeserializeObject<NoteContainer>(json) : new NoteContainer();
 
+			if (includeDisciplineIncidents)
+			{
+				// 1. Get incidents for student
+				// 2. Convert incidents into note objects and add to notes
+				// 3. Resort notes by date
+			}
+
 			// All done, return it
 			return notes;
 		}
@@ -167,9 +174,9 @@ namespace CollabTool.Web.Controllers
 		/// <summary>
 		/// Gets the notes for a student
 		/// </summary>
-		public JsonResult GetNotes(string studentId)
+		public JsonResult GetNotes(string studentId, bool includeDisciplineIncidents = true)
 		{
-			var notes = GetStudentNotes(studentId);
+			var notes = GetStudentNotes(studentId, includeDisciplineIncidents);
 			return Json(notes, JsonRequestBehavior.AllowGet);
 		}
 
@@ -185,7 +192,8 @@ namespace CollabTool.Web.Controllers
 			note.TeacherId = SessionInfo.Current.UserId;
 
 			// Get the existing student notes
-			var notes = GetStudentNotes(studentId);
+			// Do not include disciplines as these are not actually stored in the custom blob
+			var notes = GetStudentNotes(studentId, false);
 
 			// Add the new note to it
 			notes.Notes.Add(note);
@@ -203,7 +211,8 @@ namespace CollabTool.Web.Controllers
 		public JsonResult DeleteNote(string studentId, string noteId)
 		{
 			// Get the existing student notes
-			var notes = GetStudentNotes(studentId);
+			// Do not include disciplines as this function is for deleting notes only
+			var notes = GetStudentNotes(studentId, false);
 
 			// Remove the note
 			notes.Notes.RemoveAll(x => x.Id.ToString() == noteId);
@@ -285,6 +294,10 @@ namespace CollabTool.Web.Controllers
 				return Json(new { success = false, message = e.Message }, JsonRequestBehavior.AllowGet);
 			}
 		}
+
+		//--------------------------------------------------------------
+		// No functionality for deleting discipline incidents or actions
+		//--------------------------------------------------------------
 
 		#endregion
 
