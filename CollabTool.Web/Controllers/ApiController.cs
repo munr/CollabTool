@@ -218,7 +218,7 @@ namespace CollabTool.Web.Controllers
 				// 3. Convert incidents into note objects and add to notes
 			}
 
-			// 4. Re-sort list (now with notes and incidents) by date descending
+			// Re-sort list by date descending (newest first)
 			notes.Notes = notes.Notes.OrderByDescending(x => x.DateTime).ToList();
 
 			// All done, return it
@@ -282,7 +282,7 @@ namespace CollabTool.Web.Controllers
 			// Remove the note
 			notes.Notes.RemoveAll(x => x.Id.ToString() == noteId);
 
-			// Convert the list of note into JSON
+			// Convert the list of notes into JSON
 			var data = JsonConvert.SerializeObject(notes);
 
 			// Save the note notes back to the inBloom data store
@@ -290,6 +290,35 @@ namespace CollabTool.Web.Controllers
 
 			// Return the new list
 			return Json(notes, JsonRequestBehavior.AllowGet);
+		}
+
+		/// <summary>
+		/// Marks the note with the specified ID belonging to the specified user ID as resolved
+		/// </summary>
+		public JsonResult MarkNoteAsResolved(string studentId, string noteId)
+		{
+			// Get the existing student notes
+			// Do not include disciplines as this function is for deleting notes only
+			var notes = GetStudentNotes(studentId, false);
+
+			// Find the note
+			var note = notes.Notes.Find(x => x.Id.ToString() == noteId);
+
+			// Note not found?
+			if (note == null)
+				return Json(new { success = false, message = "Note not found" }, JsonRequestBehavior.AllowGet);
+
+			// Mark the note as resolved
+			note.Resolved = true;
+
+			// Convert the list of notes into JSON
+			var data = JsonConvert.SerializeObject(notes);
+
+			// Save the note notes back to the inBloom data store
+			_studentService.PutStudents(CurrentAccessToken, data, studentId);
+
+			// Return the new list
+			return Json(new { success = true, message = "Note marked as resolved successfully" }, JsonRequestBehavior.AllowGet);
 		}
 
 		#endregion
