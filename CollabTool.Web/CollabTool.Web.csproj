@@ -115,6 +115,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Components\Attributes\RequiresAuthentication.cs" />
+    <Compile Include="Components\Extensions\StringExtensions.cs" />
     <Compile Include="Components\SessionInfo.cs" />
     <Compile Include="Controllers\ApiController.cs" />
     <Compile Include="Controllers\AuthorizeController.cs" />
@@ -122,6 +123,8 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\DisciplineAction.cs" />
+    <Compile Include="Models\DisciplineIncident.cs" />
     <Compile Include="Models\Note.cs" />
     <Compile Include="Models\NoteContainer.cs" />
     <Compile Include="Models\Student.cs" />

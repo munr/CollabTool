@@ -36,13 +36,13 @@ namespace CollabTool.Web.Controllers
 		{
 			var array = _studentService.GetStudents(CurrentAccessToken);
 			var students = (from dynamic token in array
-			                select new Student
-				                {
-					                Id = token.id,
-					                Name = string.Concat(token.name.firstName, " ", token.name.lastSurname),
+							select new Student
+								{
+									Id = token.id,
+									Name = string.Concat(token.name.firstName, " ", token.name.lastSurname),
 									Class = "Mathematics 101",	// TODO: Get from API
 									Grade = "8th Grade"			// TODO: Get from API
-				                });
+								});
 
 			return Json(students, JsonRequestBehavior.AllowGet);
 		}
@@ -52,19 +52,25 @@ namespace CollabTool.Web.Controllers
 		/// </summary>
 		public JsonResult GetStudentDetail(string studentId)
 		{
-			// First get the student demographics
-			var jsonStudentObj = _studentService.GetStudentById(CurrentAccessToken, studentId);
-			dynamic objStudent = jsonStudentObj.FirstOrDefault() ?? new Object();
+			// First get the student data we need
+			dynamic objStudent = _studentService.GetStudentById(CurrentAccessToken, studentId)[0];
+			dynamic studentAcademicRecord = _studentService.GetStudentAcademicRecordByStudentId(CurrentAccessToken, studentId)[0];
+			
+			// Get the GPA
+			string gradePointAverage = studentAcademicRecord.cumulativeGradePointAverage;
+
+			// Get disabilities
+			string disabilities = string.Join(",", objStudent.disabilities);
 
 			// Summarize data into single StudentDetail object
 			var studentDetail = new
 				{
 					Name = string.Concat(objStudent.name.firstName, " ", objStudent.name.lastSurname),
-					GPA = 3.7,								// TODO: Get from API
+					GPA = gradePointAverage,
 					Classes = "Math 101, English 102",		// TODO: Get from API
 					GradeLevel = "8th Grade",				// TODO: Get from API
-					LimitedEnglish = "Limited",					// TODO: Get from API this is not a boolean
-					Disabilities = "None"					// TODO: Get from API
+					LimitedEnglish = objStudent.limitedEnglishProficiency.ToString(),
+					Disabilities = disabilities.IfNullThen("None")
 				};
 
 			return Json(studentDetail, JsonRequestBehavior.AllowGet);
@@ -271,45 +277,45 @@ namespace CollabTool.Web.Controllers
 
 		#endregion
 
-        #region nhi's tuff
+		#region nhi's tuff
 
-        //private readonly GetAttendancesData _attendanceService = new GetAttendancesData();
-        //private const string[] AttendanceEventCategoryType = new string[5]{"In Attendance", "Excused Absence", "Unexcused Absence", "Tardy", "Early departure"};
+		//private readonly GetAttendancesData _attendanceService = new GetAttendancesData();
+		//private const string[] AttendanceEventCategoryType = new string[5]{"In Attendance", "Excused Absence", "Unexcused Absence", "Tardy", "Early departure"};
 
-        public JsonResult GetAssessments(string studentId)
-        {
-            return Json(_studentService.GetStudentAssessments(CurrentAccessToken), JsonRequestBehavior.AllowGet);
-        }
+		public JsonResult GetAssessments(string studentId)
+		{
+			return Json(_studentService.GetStudentAssessments(CurrentAccessToken), JsonRequestBehavior.AllowGet);
+		}
 
-        public JsonResult GetAttendanceCount(string studentId)
-        {
-            var a = GetAttendance(studentId);
-            var att = a[0]["schoolYearAttendance"].ToString();
-            var att2 = JArray.Parse(att);
-            JArray events = null;
+		public JsonResult GetAttendanceCount(string studentId)
+		{
+			var a = GetAttendance(studentId);
+			var att = a[0]["schoolYearAttendance"].ToString();
+			var att2 = JArray.Parse(att);
+			JArray events = null;
 
-            for (var i = 0; i < att2.Count; i++)
-            {
-                JArray year = JArray.Parse(att2[i]["attendanceEvent"].ToString());
-                if (year.Count > 0)
-                    events = year;
-            }
-            var agroup = events.GroupBy(x => x["event"]).ToList();
-            JArray attendanceCount = JArray.Parse("[{'event': 'In Attendance', 'count':'0'},{'event': 'Excused Absence', 'count':'0'},{'event': 'Unexcused Absence', 'count':'0'},{'event': 'Tardy', 'count':'0'},{'event': 'Early departure', 'count':'0'}]");
-            for (var x = 0; x < agroup.Count; x++)
-            {
-                for (var y = 0; y < attendanceCount.Count; y++)
-                {
-                    if (agroup[x].Key.ToString() == attendanceCount[y]["event"].ToString())
-                        attendanceCount[y]["count"] = agroup[x].Count();
-                }
-            }
+			for (var i = 0; i < att2.Count; i++)
+			{
+				JArray year = JArray.Parse(att2[i]["attendanceEvent"].ToString());
+				if (year.Count > 0)
+					events = year;
+			}
+			var agroup = events.GroupBy(x => x["event"]).ToList();
+			JArray attendanceCount = JArray.Parse("[{'event': 'In Attendance', 'count':'0'},{'event': 'Excused Absence', 'count':'0'},{'event': 'Unexcused Absence', 'count':'0'},{'event': 'Tardy', 'count':'0'},{'event': 'Early departure', 'count':'0'}]");
+			for (var x = 0; x < agroup.Count; x++)
+			{
+				for (var y = 0; y < attendanceCount.Count; y++)
+				{
+					if (agroup[x].Key.ToString() == attendanceCount[y]["event"].ToString())
+						attendanceCount[y]["count"] = agroup[x].Count();
+				}
+			}
 
-            return Json(attendanceCount, JsonRequestBehavior.AllowGet);
-        }
+			return Json(attendanceCount, JsonRequestBehavior.AllowGet);
+		}
 
 
 
-        #endregion
+		#endregion
 	}
 }
