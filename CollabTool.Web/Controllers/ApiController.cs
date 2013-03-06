@@ -53,23 +53,34 @@ namespace CollabTool.Web.Controllers
 		public JsonResult GetStudentDetail(string studentId)
 		{
 			// First get the student data we need
-			dynamic objStudent = _studentService.GetStudentById(CurrentAccessToken, studentId)[0];
+			dynamic studentDetails = _studentService.GetStudentById(CurrentAccessToken, studentId)[0];
 			dynamic studentAcademicRecord = _studentService.GetStudentAcademicRecordByStudentId(CurrentAccessToken, studentId)[0];
-			
+			dynamic studentReportCards = _studentService.GetStudentReportCards(CurrentAccessToken, studentId);
+
+			/*
+			 * student has reportCard
+			 * reportCard has gradingPeriod
+			 * gradingPeriod has gradingPeriodIdentity
+			 * gradingPeriodIdentity has gradingPeriod
+			 * ...but not all students have reportCards so there has to be another more reliable
+			 * ...way of getting grade level.
+			 */
+
 			// Get the GPA
 			string gradePointAverage = studentAcademicRecord.cumulativeGradePointAverage;
+			string limitedEnglishProficiency = studentDetails.limitedEnglishProficiency;
 
 			// Get disabilities
-			string disabilities = string.Join(",", objStudent.disabilities);
+			string disabilities = string.Join(",", studentDetails.disabilities);
 
 			// Summarize data into single StudentDetail object
 			var studentDetail = new
 				{
-					Name = string.Concat(objStudent.name.firstName, " ", objStudent.name.lastSurname),
+					Name = string.Concat(studentDetails.name.firstName, " ", studentDetails.name.lastSurname),
 					GPA = gradePointAverage,
 					Classes = "Math 101, English 102",		// TODO: Get from API
 					GradeLevel = "8th Grade",				// TODO: Get from API
-					LimitedEnglish = objStudent.limitedEnglishProficiency.ToString(),
+					LimitedEnglish = limitedEnglishProficiency.SplitAtCapitalLetters(),
 					Disabilities = disabilities.IfNullThen("None")
 				};
 
