@@ -21,12 +21,16 @@ namespace CollabTool.Web
 				defaults: new { controller = "Api" }
 			);
 
-			// Default page
-			
+			routes.MapRoute(
+				name: "Authorize",
+				url: "Authorize/Index",
+				defaults: new { controller = "Authorize", action = "Index" }
+			);
+
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",
-                defaults: new { controller = "Home", action = "CollabTool", id = UrlParameter.Optional }
+                defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
             );
         }
     }
