@@ -162,9 +162,21 @@ namespace CollabTool.Web.Controllers
 
 			if (includeDisciplineIncidents)
 			{
-				// 1. Get incidents for student
-				// 2. Convert incidents into note objects and add to notes
-				// 3. Resort notes by date
+				var disciplineService = new GetDisciplineData();
+
+				// 1. Get student discipline incident associations
+				// https://inbloom.org/sites/default/files/docs-developer-1.0.68-20130118/ch-examples-v1.0.html#ex-v1.0-students-id-studentDisciplineIncidentAssociations
+				dynamic associations = _studentService.GetStudentStudentDisciplineIncidentAssociations(CurrentAccessToken, studentId);
+
+				// 2. Get discipline incidents
+				foreach (dynamic association in associations)
+				{
+					string disciplineIncidentId = association.disciplineIncidentId;
+					dynamic disciplineIncident = disciplineService.GetDisciplineIncidentById(CurrentAccessToken, disciplineIncidentId);
+				}
+
+				// 3. Convert incidents into note objects and add to notes
+				// 4. Re-sort list (now with notes and incidents) by date
 			}
 
 			// All done, return it
@@ -174,6 +186,8 @@ namespace CollabTool.Web.Controllers
 		/// <summary>
 		/// Gets the notes for a student
 		/// </summary>
+		/// <param name="studentId">The Student Id for whom notes should be returned</param>
+		/// <param name="includeDisciplineIncidents">Boolean value specifying whether the notes returned should also include incidents</param>
 		public JsonResult GetNotes(string studentId, bool includeDisciplineIncidents = true)
 		{
 			var notes = GetStudentNotes(studentId, includeDisciplineIncidents);
@@ -183,11 +197,12 @@ namespace CollabTool.Web.Controllers
 		/// <summary>
 		/// Add a new note to a student record
 		/// </summary>
-		/// <param name="studentId">The ID of the student to which the note should be added</param>
 		/// <param name="note">The note object to be added to the student</param>
-		/// <returns></returns>
-		public JsonResult AddNote(string studentId, Note note)
+		public JsonResult AddNote(Note note)
 		{
+			// Get the student ID from the note
+			var studentId = note.StudentId;
+
 			// Set internal properties
 			note.TeacherId = SessionInfo.Current.UserId;
 
@@ -208,6 +223,11 @@ namespace CollabTool.Web.Controllers
 			return Json(notes, JsonRequestBehavior.AllowGet);
 		}
 
+		/// <summary>
+		/// Deletes the note with the specified noteId from the specified user
+		/// </summary>
+		/// <param name="studentId">The Id of the note from whom the note should be removed</param>
+		/// <param name="noteId">The Id of the note that should be removed</param>
 		public JsonResult DeleteNote(string studentId, string noteId)
 		{
 			// Get the existing student notes
@@ -241,15 +261,23 @@ namespace CollabTool.Web.Controllers
 				// TODO: This might need to be user-entered but use random string for now
 				var incidentIdentifier = Guid.NewGuid().ToString().Split('-').First();
 
-				// Get the student school id
-				dynamic student = _studentService.GetStudentById(CurrentAccessToken, studentId);
+				// Get the student school id.  It appears that a student can be associated with multiple schools
+				// so just get the first school they are associated with.
+				dynamic associations = _studentService.GetStudentSchoolAssociationSchools(CurrentAccessToken, studentId);
 
 				// Setup the data we need to post to create the incident
-				var obj = new { incidentIdentifier, student.schoolId };
+				var obj = new { incidentIdentifier, associations[0].Id };
 
-				// Post the discipline incident
+				// Create the discipline incident
 				var service = new GetDisciplineData();
-				var response = service.PostDisciplineIncidents(CurrentAccessToken, JsonConvert.SerializeObject(obj));
+
+				// TODO: Need to get the new discipline ID back from here in order to create the association
+				dynamic response = service.PostDisciplineIncidents(CurrentAccessToken, JsonConvert.SerializeObject(obj));
+
+				// Create the discipline incident association between the student and the incident
+				// This doesn't work yet due to the problem above with getting back new discipline incident id
+				var newAssociation = new { disciplineIncidentId = response.incidentId };
+				_studentService.PostStudentDisciplineIncidentAssociations(CurrentAccessToken, JsonConvert.SerializeObject(newAssociation));
 
 				Debug.WriteLine("Created discipline incident: " + response);
 
