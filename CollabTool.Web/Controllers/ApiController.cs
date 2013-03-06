@@ -193,7 +193,7 @@ namespace CollabTool.Web.Controllers
 				if (!string.IsNullOrEmpty(note.TeacherName))
 					continue;
 
-				// Get the teacher name
+				// Otherwise, we don't have a name so try and get it
 				note.TeacherName = GetTeacherNameFromId(note.TeacherId);
 			}
 
@@ -212,12 +212,14 @@ namespace CollabTool.Web.Controllers
 					dynamic disciplineIncident = disciplineService.GetDisciplineIncidentById(CurrentAccessToken, disciplineIncidentId);
 
 					// Discipline incidents can contain multiple actions.
-					// How do we convert this into a note - there's no simple way to convert
+					// How do we convert this into a note - there's no simple way to achieve this
 				}
 
 				// 3. Convert incidents into note objects and add to notes
-				// 4. Re-sort list (now with notes and incidents) by date
 			}
+
+			// 4. Re-sort list (now with notes and incidents) by date descending
+			notes.Notes = notes.Notes.OrderByDescending(x => x.DateTime).ToList();
 
 			// All done, return it
 			return notes;
@@ -322,7 +324,7 @@ namespace CollabTool.Web.Controllers
 				var newAssociation = new { disciplineIncidentId = response.incidentId };
 				_studentService.PostStudentDisciplineIncidentAssociations(CurrentAccessToken, JsonConvert.SerializeObject(newAssociation));
 
-				Debug.WriteLine("Created discipline incident: " + response);
+				Debug.WriteLine("Created discipline incident");
 
 				return Json(new { success = true, incidentIdentifier, message = "Added discipline incident successfully" }, JsonRequestBehavior.AllowGet);
 			}
