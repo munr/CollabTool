@@ -55,5 +55,15 @@ namespace CollabTool.Web.Models
 		/// Note, these values are fixed from the UI but stored as text in the inBloom data store
 		/// </summary>
 		public string NoteType { get; set; }
+
+		/// <summary>
+		/// Boolean value specifying whether an email notification was sent
+		/// </summary>
+		public bool EmailNotificationSent { get; set; }
+
+		/// <summary>
+		/// List of recipients to whom the email notification was sent
+		/// </summary>
+		public string[] EmailRecipients { get; set; }
 	}
 }
