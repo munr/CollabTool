@@ -18,15 +18,26 @@ namespace CollabTool.Web.Controllers
 	[RequiresAuthentication]
 	public class ApiController : Controller
 	{
-		private readonly GetStudentsData _studentService = new GetStudentsData();
+		#region Fields
 
 		/// <summary>
-		/// Shortcut to the current session token
+		/// Student service
+		/// </summary>
+		private readonly GetStudentsData _studentService = new GetStudentsData();
+
+		#endregion
+
+		#region Properties
+
+		/// <summary>
+		/// Shortcut to the access token stored in the user's session
 		/// </summary>
 		private string CurrentAccessToken
 		{
 			get { return SessionInfo.Current.AccessToken; }
 		}
+
+		#endregion
 
 		#region Student List and Detail
 
@@ -121,6 +132,21 @@ namespace CollabTool.Web.Controllers
 		#region Notes
 
 		/// <summary>
+		/// Get a teachers name from their ID using the inBloom API
+		/// </summary>
+		private string GetTeacherNameFromId(string id)
+		{
+			// Set missing teacher names to "unknown"
+			// Should never occur, but just in case we hit test data
+			if (string.IsNullOrEmpty(id))
+				return "Unknown";
+
+			// Otherwise, we have a teacher ID so use it to get the teacher name
+			dynamic teacher = new GetTeachersData().GetTeacherById(CurrentAccessToken, id)[0];
+			return string.Concat(teacher.name.firstName, " ", teacher.name.lastSurname);
+		}
+
+		/// <summary>
 		/// Get a collection of notes for the specified student from the inBloom data store
 		/// </summary>
 		private NoteContainer GetStudentNotes(string studentId, bool includeDisciplineIncidents)
@@ -161,6 +187,17 @@ namespace CollabTool.Web.Controllers
 			// Convert into strongly typed collection if possible
 			var notes = (!string.IsNullOrEmpty(json)) ? JsonConvert.DeserializeObject<NoteContainer>(json) : new NoteContainer();
 
+			// Now set teacher names if required
+			foreach (var note in notes.Notes)
+			{
+				// Don't bother trying to get teacher name if we have it stored already
+				if (!string.IsNullOrEmpty(note.TeacherName))
+					continue;
+
+				// Get the teacher name
+				note.TeacherName = GetTeacherNameFromId(note.TeacherId);
+			}
+
 			if (includeDisciplineIncidents)
 			{
 				var disciplineService = new GetDisciplineData();
@@ -174,6 +211,9 @@ namespace CollabTool.Web.Controllers
 				{
 					string disciplineIncidentId = association.disciplineIncidentId;
 					dynamic disciplineIncident = disciplineService.GetDisciplineIncidentById(CurrentAccessToken, disciplineIncidentId);
+
+					// Discipline incidents can contain multiple actions.
+					// How do we convert this into a note - there's no simple way to convert
 				}
 
 				// 3. Convert incidents into note objects and add to notes
@@ -206,6 +246,9 @@ namespace CollabTool.Web.Controllers
 
 			// Set internal properties
 			note.TeacherId = SessionInfo.Current.UserId;
+
+			// Just store the teacher name as well, to make reading the notes back quicker
+			note.TeacherName = GetTeacherNameFromId(note.TeacherId);
 
 			// Get the existing student notes
 			// Do not include disciplines as these are not actually stored in the custom blob
