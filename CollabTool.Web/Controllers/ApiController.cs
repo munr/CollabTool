@@ -177,5 +177,46 @@ namespace CollabTool.Web.Controllers
 		}
 
 		#endregion
-	}
+
+        #region nhi's tuff
+
+        //private readonly GetAttendancesData _attendanceService = new GetAttendancesData();
+        //private const string[] AttendanceEventCategoryType = new string[5]{"In Attendance", "Excused Absence", "Unexcused Absence", "Tardy", "Early departure"};
+
+        public JsonResult GetAssessments(string studentId)
+        {
+            return Json(_studentService.GetStudentAssessments(CurrentAccessToken), JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult GetAttendanceCount(string studentId)
+        {
+            var a = GetAttendance(studentId);
+            var att = a[0]["schoolYearAttendance"].ToString();
+            var att2 = JArray.Parse(att);
+            JArray events = null;
+
+            for (var i = 0; i < att2.Count; i++)
+            {
+                JArray year = JArray.Parse(att2[i]["attendanceEvent"].ToString());
+                if (year.Count > 0)
+                    events = year;
+            }
+            var agroup = events.GroupBy(x => x["event"]).ToList();
+            JArray attendanceCount = JArray.Parse("[{'event': 'In Attendance', 'count':'0'},{'event': 'Excused Absence', 'count':'0'},{'event': 'Unexcused Absence', 'count':'0'},{'event': 'Tardy', 'count':'0'},{'event': 'Early departure', 'count':'0'}]");
+            for (var x = 0; x < agroup.Count; x++)
+            {
+                for (var y = 0; y < attendanceCount.Count; y++)
+                {
+                    if(agroup[x].Key.ToString() == attendanceCount[y]["event"].ToString())
+                    attendanceCount[y]["count"] = agroup[x].Count();
+                }
+            }
+
+            return Json(attendanceCount, JsonRequestBehavior.AllowGet);
+        }
+
+        
+
+        #endregion
+    }
 }

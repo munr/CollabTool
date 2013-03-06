@@ -16,6 +16,10 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>true</UseIISExpress>
+    <IISExpressSSLPort />
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -126,6 +130,43 @@
   <ItemGroup>
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Content Include="content\css\collabTool.css" />
+    <Content Include="content\css\core.css" />
+    <Content Include="content\css\speechBubble.css" />
+    <Content Include="content\img\arrow_up.png" />
+    <Content Include="content\img\Flag2_Green.png" />
+    <Content Include="content\img\flag_red.png" />
+    <Content Include="content\img\important.png" />
+    <Content Include="content\img\inbloom-logo.png" />
+    <Content Include="content\img\mail.png" />
+    <Content Include="content\img\search-icon.png" />
+    <Content Include="content\img\speech_bubble_left_2.png" />
+    <Content Include="content\img\speech_bubble_right_2.png" />
+    <Content Include="content\img\status_message.png" />
+    <Content Include="content\img\student-icon-female.png" />
+    <Content Include="content\img\student-icon-male.png" />
+    <Content Include="content\img\timeline.PNG" />
+    <Content Include="content\js\collabTool.js" />
+    <Content Include="content\vendor\bootstrap\css\bootstrap-responsive.css" />
+    <Content Include="content\vendor\bootstrap\css\bootstrap-responsive.min.css" />
+    <Content Include="content\vendor\bootstrap\css\bootstrap.css" />
+    <Content Include="content\vendor\bootstrap\css\bootstrap.min.css" />
+    <Content Include="content\vendor\bootstrap\img\glyphicons-halflings-white.png" />
+    <Content Include="content\vendor\bootstrap\img\glyphicons-halflings.png" />
+    <Content Include="content\vendor\bootstrap\js\bootstrap.js" />
+    <Content Include="content\vendor\bootstrap\js\bootstrap.min.js" />
+    <Content Include="content\vendor\handlebars\handlebars.js" />
+    <Content Include="content\vendor\highcharts\highcharts.js" />
+    <Content Include="content\vendor\select2\select2-spinner.gif" />
+    <Content Include="content\vendor\select2\select2.css" />
+    <Content Include="content\vendor\select2\select2.js" />
+    <Content Include="content\vendor\select2\select2.min.js" />
+    <Content Include="content\vendor\select2\select2.png" />
+    <Content Include="content\vendor\select2\select2x2.png" />
+    <Content Include="content\vendor\select2\select2_locale_es.js" />
+    <Content Include="content\vendor\select2\select2_locale_hu.js" />
+    <Content Include="content\vendor\select2\select2_locale_it.js" />
+    <Content Include="content\vendor\underscore\underscore.min.js" />
     <Content Include="Global.asax" />
     <Content Include="Web.config" />
     <Content Include="Views\Web.config" />
@@ -138,6 +179,16 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Home\Index.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="content\vendor\select2\component.json" />
+    <Content Include="content\vendor\select2\LICENSE" />
+    <Content Include="content\vendor\select2\README.md" />
+    <Content Include="content\vendor\select2\release.sh" />
+    <Content Include="content\vendor\select2\select2.jquery.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Home\CollabTool.cshtml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
