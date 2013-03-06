@@ -20,6 +20,11 @@ namespace CollabTool.Web.Models
 		public Guid Id { get; set; }
 
 		/// <summary>
+		/// The student ID
+		/// </summary>
+		public string StudentId { get; set; }
+
+		/// <summary>
 		/// The note subject
 		/// </summary>
 		public string Subject { get; set; }

@@ -10,6 +10,12 @@ namespace CollabTool.Web
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
 			routes.MapRoute(
+				name: "ApiGetNotes",
+				url: "api/GetNotes/{studentId}/{includeDisciplineIncidents}",
+				defaults: new { controller = "Api", action = "GetNotes", includeDisciplineIncidents = true }
+			);
+
+			routes.MapRoute(
 				name: "Api",
 				url: "api/{action}/{studentId}",
 				defaults: new { controller = "Api" }
