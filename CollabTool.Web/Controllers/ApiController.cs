@@ -81,6 +81,7 @@ namespace CollabTool.Web.Controllers
 			// Get the GPA
 			string gradePointAverage = studentAcademicRecord.cumulativeGradePointAverage;
 			string limitedEnglishProficiency = studentDetails.limitedEnglishProficiency;
+			string isLimitedEnglishProficiency = (limitedEnglishProficiency == "NotLimited") ? "No" : "Yes";
 
 			// Get disabilities
 			string disabilities = string.Join(",", studentDetails.disabilities);
@@ -90,9 +91,9 @@ namespace CollabTool.Web.Controllers
 				{
 					Name = string.Concat(studentDetails.name.firstName, " ", studentDetails.name.lastSurname),
 					GPA = gradePointAverage,
-					Classes = "Math 101, English 102",		// TODO: Get from API
-					GradeLevel = "8th Grade",				// TODO: Get from API
-					LimitedEnglish = limitedEnglishProficiency.SplitAtCapitalLetters(),
+					Classes = "Mathematics 101, English 102",		// TODO: Get from API
+					GradeLevel = "8th Grade",						// TODO: Get from API
+					LimitedEnglish = string.Format("{0} ({1})", isLimitedEnglishProficiency, limitedEnglishProficiency.SplitAtCapitalLetters()),
 					Disabilities = disabilities.IfNullThen("None")
 				};
 
@@ -194,7 +195,7 @@ namespace CollabTool.Web.Controllers
 				if (!string.IsNullOrEmpty(note.TeacherName))
 					continue;
 
-				// Get the teacher name
+				// Otherwise, we don't have a name so try and get it
 				note.TeacherName = GetTeacherNameFromId(note.TeacherId);
 			}
 
@@ -213,12 +214,14 @@ namespace CollabTool.Web.Controllers
 					dynamic disciplineIncident = disciplineService.GetDisciplineIncidentById(CurrentAccessToken, disciplineIncidentId);
 
 					// Discipline incidents can contain multiple actions.
-					// How do we convert this into a note - there's no simple way to convert
+					// How do we convert this into a note - there's no simple way to achieve this
 				}
 
 				// 3. Convert incidents into note objects and add to notes
-				// 4. Re-sort list (now with notes and incidents) by date
 			}
+
+			// Re-sort list by date descending (newest first)
+			notes.Notes = notes.Notes.OrderByDescending(x => x.DateTime).ToList();
 
 			// All done, return it
 			return notes;
@@ -281,7 +284,7 @@ namespace CollabTool.Web.Controllers
 			// Remove the note
 			notes.Notes.RemoveAll(x => x.Id.ToString() == noteId);
 
-			// Convert the list of note into JSON
+			// Convert the list of notes into JSON
 			var data = JsonConvert.SerializeObject(notes);
 
 			// Save the note notes back to the inBloom data store
@@ -289,6 +292,35 @@ namespace CollabTool.Web.Controllers
 
 			// Return the new list
 			return Json(notes, JsonRequestBehavior.AllowGet);
+		}
+
+		/// <summary>
+		/// Marks the note with the specified ID belonging to the specified user ID as resolved
+		/// </summary>
+		public JsonResult MarkNoteAsResolved(string studentId, string noteId)
+		{
+			// Get the existing student notes
+			// Do not include disciplines as this function is for deleting notes only
+			var notes = GetStudentNotes(studentId, false);
+
+			// Find the note
+			var note = notes.Notes.Find(x => x.Id.ToString() == noteId);
+
+			// Note not found?
+			if (note == null)
+				return Json(new { success = false, message = "Note not found" }, JsonRequestBehavior.AllowGet);
+
+			// Mark the note as resolved
+			note.Resolved = true;
+
+			// Convert the list of notes into JSON
+			var data = JsonConvert.SerializeObject(notes);
+
+			// Save the note notes back to the inBloom data store
+			_studentService.PutStudents(CurrentAccessToken, data, studentId);
+
+			// Return the new list
+			return Json(new { success = true, message = "Note marked as resolved successfully" }, JsonRequestBehavior.AllowGet);
 		}
 
 		#endregion
@@ -323,7 +355,7 @@ namespace CollabTool.Web.Controllers
 				var newAssociation = new { disciplineIncidentId = response.incidentId };
 				_studentService.PostStudentDisciplineIncidentAssociations(CurrentAccessToken, JsonConvert.SerializeObject(newAssociation));
 
-				Debug.WriteLine("Created discipline incident: " + response);
+				Debug.WriteLine("Created discipline incident");
 
 				return Json(new { success = true, incidentIdentifier, message = "Added discipline incident successfully" }, JsonRequestBehavior.AllowGet);
 			}
