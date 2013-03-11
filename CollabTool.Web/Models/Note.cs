@@ -31,6 +31,7 @@ namespace CollabTool.Web.Models
 
 		/// <summary>
 		/// The main note text
+        /// 
 		/// </summary>
 		public string Text { get; set; }
 
@@ -88,7 +89,9 @@ namespace CollabTool.Web.Models
 		/// Boolean value specifying whether this incident has been resolved
 		/// </summary>
 		public bool Resolved { get; set; }
-		
+
+        public string Resolution { get; set; }
+
 		#endregion
 	}
 }

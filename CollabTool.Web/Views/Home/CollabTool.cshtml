@@ -50,7 +50,7 @@
 						  </ol>
 						  <!-- Carousel items -->
 						  <div class="carousel-inner">
-						    <div class="active item">						    	
+						    <div class="item">						    	
 								<div id="attendanceChart">
 								</div>
 						    </div>
@@ -58,9 +58,9 @@
 							    <div id="testScoresChart">
 								</div>
 						    </div>
-						    <div class="item">
+						    <div class="active item">
 						    	<div id="disciplineDiv">
-							    	<h2>Disciplinary Incidents</h2>
+							    	<div class="disciplineChartTitle">Disciplinary Incidents</div>
 							    	<div id="disciplineChart">
 							    	</div>
 							    	<img id="timeline" src="~/content/img/timeline.png"/>
@@ -81,6 +81,7 @@
 								</div>
 								<div id="notesFilters" class="display-inline">
 									Filters:
+                                    <img data-rank="mail" class="noteRankFilterIcon" src="~/content/img/mail.png"/>
 									<img data-rank="discipline" class="noteRankFilterIcon" src="~/content/img/important.png"/>
 									<img data-rank="comment" class="noteRankFilterIcon" src="~/content/img/status_message.png"/>
 									<img data-rank="compliment" class="noteRankFilterIcon" src="~/content/img/arrow_up.png"/>
@@ -97,6 +98,9 @@
 						<div style="text-align:center">
 							<h2>Log Note</h2>
 						</div>
+                        <div class="newNoteField flag flagNoteId">
+                            <input type="hidden" id="flagNoteId" />
+                        </div>
 						<div class="newNoteField discipline compliment comment">
 							<span class="newNoteFieldLabel">Type:</span>
 							<select id="newNoteRankDropdown" class="apply-select2">
@@ -105,7 +109,7 @@
 								<option value="compliment">Compliment</option>
 							</select>
 						</div>
-						<div class="newNoteField disciplie compliment comment">
+						<div class="newNoteField discipline compliment comment">
 							<span class="newNoteFieldLabel">Title:</span>
 							<input id="newNoteTitleTxt" type="text" maxlength="20"/>
 						</div>
@@ -116,11 +120,11 @@
 						<div class="newNoteField discipline">
 							<span class="newNoteFieldLabel">Location:</span>
 							<select id="newNoteLocation" class="apply-select2">
-								<option>On School</option>
-								<option>Cafeteria Area</option>
-								<option>Classroom</option>
-								<option>Hallway</option>
-								<option>Restroom</option>
+								<option value="On School">On School</option>
+								<option value="Cafeteria Area">Cafeteria Area</option>
+								<option value="Classroom">Classroom</option>
+								<option value="Hallway">Hallway</option>
+								<option value="Restroom">Restroom</option>
 							</select>
 						</div>
 						<div class="newNoteField discipline">
@@ -130,16 +134,20 @@
 						<div class="newNoteField discipline">
 							<span class="newNoteFieldLabel">Behavior Type:</span>
 							<select id="newNoteBehaviorType" class="apply-select2">
-								<option>State Law Crime</option>
-								<option>State Offense</option>
-								<option>School Violation</option>
-								<option>School Code of Conduct</option>
+								<option value="State Law Crime">State Law Crime</option>
+								<option value="State Offense">State Offense</option>
+								<option value="School Violation">School Violation</option>
+								<option value="School Code of Conduct">School Code of Conduct</option>
 							</select>
 						</div>
 						<div class="newNoteField flag">
 							<span class="newNoteFieldLabel">Date resolved:</span>
-							<input type="text"/>
+							<input id="noteDateResolved" type="text"/>
 						</div>
+                        <div class="newNoteEmailFields newNoteField discipline compliment comment flag">
+                            <input id="newNoteSendToParent" type="checkbox" /> send to parent
+                            <input id="newNoteSendToStudent" type="checkbox" /> send to student
+                        </div>
 						<div style="text-align:center">
 							<button id="saveNewNoteBtn" class="btn btn-primary">Save</button>
 						</div>
@@ -158,7 +166,6 @@
 			{{/if}}
 			<div class="studentListItemData">
 				<div>{{Name}}</div>
-				<div>{{Class}}</div>
 				<div>{{Grade}}</div>
 				<hr class="studentLineDivider"/>
 			</div>
@@ -179,7 +186,7 @@
 	</script>
 
 	<script id="studentNoteTemplate" type="text/x-handlebars-template">
-		<div class="studentNote" data-id={{ID}}>			
+		<div class="studentNote" data-id={{Id}}>			
 			<div class="studentNoteInner {{notePosition}}">
 				{{#if left}}
 					<div class="studentNoteIcons">
@@ -190,11 +197,18 @@
 				<div class="display-inline messageBlock">
 					<div>
 						<b>{{Subject}}</b>
-						{{#if didSendEmail}}
+						{{#if EmailNotificationSent}}
 							<img class="studentNoteIcon mailIcon" src="/content/img/mail.png"/>
 						{{/if}}
+                        {{#if ShowFlag }}
+                            {{#if Resolved }}
+                                <img class="noteGreenFlag" style="width:2em" src="/content/img/Flag2_Green.png"/>
+                            {{else}}
+                                <img class="noteRedFlag" data-note-id="{{Id}}" style="width:2em" src="/content/img/flag_red.png"/>
+                            {{/if}}
+                        {{/if}}
 						<span class="noteTimestamp">
-							<b>{{TeacherId}}</b>  {{DateTime}}
+							<b>{{TeacherName}}</b>  {{DateTime}}
 						</span>
 					</div>
 					<div>
@@ -203,7 +217,7 @@
 				</div>
 				{{#if right}}
 					<div class="studentNoteIcons">
-						<img src="{{userIconUrl}}" alt="{{userIconTitle}}" title="{{userIconTitle}}" class="userIcon {{imagePosition}}"/>
+						<img src="/content/img/mr_thompson.jpg" alt="{{userIconTitle}}" title="{{userIconTitle}}" class="userIcon {{imagePosition}}"/>
 						<img src="{{rankUrl}}" class="rankIconRight"/>
 					</div>
 				{{/if}}
@@ -219,17 +233,17 @@
 			<div class="studentDisciplineObject {{color}}">	
 			</div>
 			<div class="studentDisciplineIncidentTime">
-				{{incidentTime}}
+				{{IncidentTime}}
 			</div>
 		</div>
 	</script>
 
 	<script id="studentDisciplineObjectTooltip" type="text/x-handlebars-template">
 		<div>
-			<b>{{behaviorType}} at {{location}}</b>
+			<b>{{BehaviorType}} at {{Location}}</b>
 		</div>
 		<div>
-			{{noteText}}
+			{{Text}}
 		</div>
 	</script>
 	<!--  Third party   -->

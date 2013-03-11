@@ -260,7 +260,10 @@ namespace CollabTool.Web.Controllers
 			// Add the new note to it
 			notes.Notes.Add(note);
 
-			// Convert the list of note into JSON
+            // Re-sort list by date descending (newest first)
+            notes.Notes = notes.Notes.OrderByDescending(x => x.DateTime).ToList();
+			
+            // Convert the list of note into JSON
 			var data = JsonConvert.SerializeObject(notes);
 
 			// Save then note back to the inBloom data store
@@ -297,7 +300,7 @@ namespace CollabTool.Web.Controllers
 		/// <summary>
 		/// Marks the note with the specified ID belonging to the specified user ID as resolved
 		/// </summary>
-		public JsonResult MarkNoteAsResolved(string studentId, string noteId)
+		public JsonResult MarkNoteAsResolved(string studentId, string noteId, string description)
 		{
 			// Get the existing student notes
 			// Do not include disciplines as this function is for deleting notes only
@@ -312,6 +315,7 @@ namespace CollabTool.Web.Controllers
 
 			// Mark the note as resolved
 			note.Resolved = true;
+            note.Resolution = description;
 
 			// Convert the list of notes into JSON
 			var data = JsonConvert.SerializeObject(notes);

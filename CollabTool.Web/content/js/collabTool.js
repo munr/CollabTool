@@ -1,6 +1,8 @@
 (function(){
 	var students = [],
 		allNotes = [],
+        selectedStudentId,
+        position,
 		sidebarDiv = $("#sidebar"),
 		studentSearchBox = $("#txtStudentSearchBox"),
 		studentListItemClass = ".studentListItem",
@@ -110,12 +112,16 @@
 		studentListElement.delegate(studentListItemClass, 'click', studentListItemClickHandler);
 		studentSearchBox.keyup(studentSearchBoxChangeHandler);
 		studentNotesDiv.delegate(removeNoteBtnClass, 'click', removeNoteBtnClickHandler);
+		studentNotesDiv.delegate('.noteRedFlag', 'click', noteRedFlagClickHandler);
 		addNoteBtn.click(addNoteClickHandler);
 		closeNewNoteFormBtn.click(closeNewNoteFormClickHandler);
 		saveNewNoteBtn.click(saveNewNoteClickHandler);
 		notesSearchBox.keyup(notesSearchBoxChangeHandler);
 		noteRankFilterIconClass.click(noteRankFilterClickHandler);
 		newNoteRankDropdown.change(newNoteRankDropdownChangeHandler);
+
+		$("#newNoteDateTime").datepicker();
+		$("#noteDateResolved").datepicker();
 
 		$('.apply-select2').select2({ width: 'element'});
 	}
@@ -124,6 +130,8 @@
 	 *
 	 */
 	function getStudentsCallback(studentList) {
+	    // cache the student list
+	    students = studentList;
 		_.each(studentList, function(student) {		
 			// insert into DOM
 			addStudentToList(student);
@@ -169,6 +177,9 @@
 		var studentListItem = $(event.currentTarget),
 		studentId = studentListItem.data('student-id');
 		
+	    // keep track of selected student
+		selectedStudentId = studentId;
+
 		// TODO make AJAX call to get the student's details
 		$.ajax({
 		    type: 'GET',
@@ -181,9 +192,13 @@
 		$.ajax({
 		    type: 'GET',
 		    url: '/Api/GetNotes?studentId=' + studentId,
-		    success: function (notes) {
+		    success: function (result) {
+		        var notes = result.Notes;
 		        allNotes = notes;
 		        displayStudentNotes(notes);
+
+                // discipline charts uses the notes
+		        drawDisciplineChart(notes);
 		    }
 		});
 	}
@@ -212,16 +227,27 @@
 
 	 	// TODO prepare data for charts
 	 	drawPerformanceChart(student);
-	 	drawAttendanceChart(student);
-	 	drawDisciplineChart(student);
+
+	     // make AJAX call to get attendance data
+	 	$.ajax({
+	 	    type: 'GET',
+	 	    url: '/Api/GetAttendanceCount?studentId=' + selectedStudentId,
+	 	    success: function (attendances) {
+	 	        var attendanceData = [];
+	 	        for (var i = 0; i < attendances.length; i++) {
+	 	            var attendance = attendances[i];
+	 	            attendanceData.push([attendance.name, attendance.value]);
+	 	        }
+	 	        drawAttendanceChart(attendanceData);
+	 	    }
+	 	});
 	 }
 
 	 /**
 	  *
 	  */
-	 function drawAttendanceChart(student) {
-	 	var attendanceData = student.attendanceData,
-	 		chart = new Highcharts.Chart({
+	 function drawAttendanceChart(attendanceData) {
+	 	var chart = new Highcharts.Chart({
             chart: {
                 renderTo: 'attendanceChart',
                 plotBackgroundColor: null,
@@ -267,7 +293,7 @@
                   name: 'Class Average',
                   data: [[new Date('2013-01-13').getTime(), 76], [new Date('2013-3-14').getTime(), 72], [new Date('2013-5-2').getTime(), 81], [new Date('2013-5-14').getTime(), 82], [new Date('2013-6-17').getTime(), 73]]
               }, {
-                  name: 'Bob', // replace with student name
+                  name: student.Name, // replace with student name
                   data: [[new Date('2013-01-07').getTime(), 72], [new Date('2013-02-02').getTime(), 76], [new Date('2013-03-14').getTime(), 84], [new Date('2013-5-18').getTime(), 87], [new Date('2013-6-21').getTime(), 73]]
               }];
 	     //var performanceData = student.testScores,
@@ -336,17 +362,20 @@
 	 	});
 	 }
 
-	 function drawDisciplineChart(student) {
-	 	var notes = student.notes;
+	 function drawDisciplineChart(notes) {	 	
 	 	var disciplineItems = _.filter(notes, function(note) {
-	 		return note.rank === 'discipline';
+	 		return note.NoteType === 'discipline';
+	 	});
+        
+	 	disciplineItems = _.sortBy(disciplineItems, function (item) {
+	 	    return new Date(item.IncidentTime).getTime();
 	 	});
 
 	 	$("#disciplineChart").empty();
 	 	_.each(disciplineItems, function(note){
 
 	 		//assign color based on behavior type
-	 		var resolved = note.resolved,
+	 		var resolved = note.Resolved,
 	 			color;
 	 		if (resolved) {
 	 			color = 'green';
@@ -395,10 +424,13 @@
 	 	var rankValue = rankElem.data('rank');
 
 	 	if (rankValue === currentSelectedRank) {
-	 		filterNotes(['rank'], ''); //reset filter
-	 	} else {		
-		 	rankElem.addClass('rankSelected');
-		 	filterNotes(['rank'], rankValue);	 		
+	 		filterNotes(['NoteType'], ''); //reset filter
+	 	} else if (rankValue === 'mail') {
+	 	    filterNotes(['EmailNotificationSent'], true);
+	 	}
+	 	else {
+	 	    rankElem.addClass('rankSelected');
+	 	    filterNotes(['NoteType'], rankValue);
 	 	}
 
 	 }
@@ -413,10 +445,14 @@
 	 		for (var i = 0; i < numAttributes; i++) {
 	 			var attribute = attributes[i];
 	 			var attrVal = note[attribute];
-	 			if (attrVal.indexOf(value) !== -1) {
-	 				filteredNotes.push(note);
-	 				break;
-	 			}
+	 		    try{
+	 		        if (attrVal === value || attrVal.indexOf(value) !== -1) {
+	 		            filteredNotes.push(note);
+	 		            break;
+	 		        }
+	 		    }
+	 		    catch (ex) {
+	 		    }
 	 		}
 	 	});
 
@@ -427,18 +463,26 @@
 	  *
 	  */
 	 function displayStudentNotes(notes) {
-	 	var position = 'Left';
+	    position = 'Left';
 
 	 	studentNotesDiv.empty();
 	  	// insert note into the DOM
 	  	_.each(notes, function(note) {
-	  		note.notePosition = position;
+	  	    note.notePosition = position;
+	  	    var dateTime = note.DateTime;
+	  	    try {
+	  	        note.DateTime = new Date(parseInt(note.DateTime.replace("/Date(", "").replace(")/", ""), 10)).toDateString();
+	  	    }
+	  	    catch (ex) {
+	  	    }                           
+
 	  		note.left = position === 'Left';
 	  		note.right = position === 'Right';
 
-	  		switch(note.rank) {
+	  		switch(note.NoteType) {
 	  			case 'discipline' : 
-	  				note.rankUrl = '/content/img/important.png';
+	  			    note.rankUrl = '/content/img/important.png';
+	  			    note.ShowFlag = true;                    
 	  				break;
 	  			case 'compliment' :
 	  				note.rankUrl = '/content/img/arrow_up.png';
@@ -451,35 +495,61 @@
 	  		var noteHtml = studentNoteTemplate(note);
 	  		studentNotesDiv.append(noteHtml);
 
-	  		studentNotesDiv.find('.studentNoteIcon.mailIcon').tooltip({
-	  			title: 'Sent to: ' + note.emailRecipients
+	  		studentNotesDiv.find('.studentNote[data-id="' + note.Id + '"]').find('.noteGreenFlag').tooltip({
+	  		    title: 'Resolution: ' + note.Resolution
+	  		});
+
+	  		studentNotesDiv.find('.studentNote[data-id="' + note.Id + '"]').find('.mailIcon').tooltip({
+	  			title: 'Sent to: ' + note.EmailRecipients
 	  		});
 
 	  		// switch positions
-	  		position = position === 'Left' ? 'Right' : 'Left';
+	  		//position = position === 'Left' ? 'Right' : 'Left';
 	  	});
 	  }
 
-	  /**
-	   *
-	   */
-	  function removeNoteBtnClickHandler(event) {
-	  	var parent = $(event.currentTarget).parents('.studentNote');
-	  	parent.hide('fade');
-	  }
 
 	  /**
 	   *
 	   */
-	  function addNoteClickHandler() {
-	  	mainContentElement.toggle('slide', 600);
-	  	newNoteFormElement.toggle('slide', { duration: 600, direction: 'right' });
+	 function removeNoteBtnClickHandler(event) {	     
+	     var parent = $(event.currentTarget).parents('.studentNote');
+	     $.ajax({
+	         type: 'POST',
+	         url: '/Api/DeleteNote',
+	         data: {
+	             studentId: selectedStudentId,
+                 noteId: parent.data('id')
+	         },
+	         success: function () {
+	             parent.hide('fade');
+	         }
+	     });
+	  }
+
+	 function noteRedFlagClickHandler(event) {
+	     var noteId = $(event.currentTarget).data('note-id');
+	     $("#flagNoteId").val(noteId);
+	     toggleNewNoteForm();
+	     toggleNoteFields('flag');
+	 }
+
+	  /**
+	   *
+	   */
+	 function addNoteClickHandler() {
+	    toggleNewNoteForm();
 	  	toggleNoteFields('discipline');
 	  }
 
-	  function closeNewNoteFormClickHandler() {
-	  	mainContentElement.toggle('slide', 600);
-	  	newNoteFormElement.toggle('slide', { duration: 600, direction: 'right' });	
+	 function closeNewNoteFormClickHandler() {
+	     toggleNewNoteForm();
+	  }
+
+	 function toggleNewNoteForm() {
+	      newNoteFormElement.find('input[type="text"]').val('');
+	      mainContentElement.toggle('slide', 600);
+	      newNoteFormElement.toggle('slide', { duration: 600, direction: 'right' });	  	
 	  }
 
 	  function newNoteRankDropdownChangeHandler(event) {
@@ -491,36 +561,76 @@
 	   *
 	   */
 	  function saveNewNoteClickHandler(event) {
-	  	var noteType = $("#newNoteRankDropdown").val(),
-	  		newNoteObject = {
-	  			rank: noteType,
-	  			title: $("#newNoteTitleTxt").val(),
-	  			description: $("#newNoteDescription").val()
-	  		};
 
-	  	if (noteType === 'discipline') {	  		
-  			newNoteObject = {
-  				location: $("#newNoteLocation").val(),
-  				incidentTime: $("#newNoteDateTime").val(),
-  				behaviorType: $("#newNoteBehaviorType").val()
-  			}
-	  	}
+	      if ($(".flagNoteId").css('display') !== 'none') {
+	          var noteId = $("#flagNoteId").val();
+	          var noteDescription = $("#newNoteDescription").val();
+	          $.ajax({
+	              type: 'POST',
+	              url: '/Api/MarkNoteAsResolved',
+	              data: {
+	                  studentId: selectedStudentId,
+	                  noteId: noteId,
+	                  description: noteDescription
+	              },
+	              success: function (result) {
+	                  if (result.success) {
+	                      $.ajax({
+	                          type: 'GET',
+	                          url: '/Api/GetNotes?studentId=' + selectedStudentId,
+	                          success: function (result) {
+	                              var notes = result.Notes;
+	                              allNotes = notes;
+	                              displayStudentNotes(notes);
 
-	  	// $.ajax({
-	  	// 	'type' : 'POST',
-	  	// 	'url' : '',
-	  	// 	'data' : newNoteObject,
-	  	// 	'success': saveNewNoteSuccessHandler
-	  	// });
+	                              // discipline charts uses the notes
+	                              drawDisciplineChart(notes);
+	                          }
+	                      });
+	                      toggleNewNoteForm();
+	                  }
+	              }
+	          });
+	      } else {
+
+	          var url = '/Api/AddNote',
+              noteType = $("#newNoteRankDropdown").val(),
+              newNoteObject = {
+                  StudentId: selectedStudentId,
+                  NoteType: noteType,
+                  Subject: $("#newNoteTitleTxt").val(),
+                  Text: $("#newNoteDescription").val()
+              };
+
+	          if (noteType === 'discipline') {
+	              // url = '/Api/AddDisciplineIncident',
+	              newNoteObject.Location = $("#newNoteLocation").val();
+	              newNoteObject.IncidentTime = $("#newNoteDateTime").val();
+	              newNoteObject.BehaviorType = $("#newNoteBehaviorType").val();
+	          }
+
+	          if ($("#newNoteSendToParent").is(":checked")) {
+	              newNoteObject.EmailNotificationSent = true;
+	              newNoteObject.EmailRecipients = 'mikeng13@gmail.com';
+	          }
+
+	          $.ajax({
+	              'type': 'POST',
+	              'url': url,
+	              'data': newNoteObject,
+	              'success': saveNewNoteSuccessHandler
+	          });
+	      }
 	  }
 
 	  /**
 	   *
 	   */
-	  function saveNewNoteSuccessHandler(note) {
-	  	// save the id of the new note
-	  	var noteHtml = studentNoteTemplate(note);
-	  	studentNotesDiv.prepend(noteHtml);
+	  function saveNewNoteSuccessHandler(result) {
+	      var notes = result.Notes;
+	      displayStudentNotes(notes);
+	      drawDisciplineChart(notes);	      
+	  	  toggleNewNoteForm();
 	  }
 
 	  /**

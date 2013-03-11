@@ -67,6 +67,7 @@
 }
 .studentLineDivider {
 	border-bottom: 1.5px solid #999999;
+    margin:0px;
 }
 
 /*     CONTENT      */
@@ -100,6 +101,7 @@
 }
 #studentChartsCarousel {
 	padding-left:4em;
+    padding-top:2em;
 }
 #studentInfo {
 	vertical-align: top;
@@ -111,15 +113,15 @@
 .userDetailInfo {
 }
 #testScoresChart {
-	height:220px;
+	height:250px;
 	width:600px;
 }
 #attendanceChart {
-	height:220px;
+	height:250px;
 	width:600px;
 }
 #disciplineDiv {
-	height:220px;
+	height:250px;
 	padding-left:2em;
 }
 
@@ -160,7 +162,7 @@
 }
 #notesFilters {
 	position:absolute;
-	left:80%;
+	left:75%;
 }
 #studentNotes {
 }
@@ -191,6 +193,7 @@
 }
 .noteRankIcon, .noteRankFilterIcon {
 	width:2em;
+    cursor:pointer;
 }
 .noteTimestamp {
 	font-style: italic;
@@ -209,6 +212,7 @@
 }
 .studentNoteInner {
 	display:inline-block;
+    width:100%;
 }
 .studentNoteInner.Right {
 	float:right;
@@ -257,13 +261,22 @@
 	display:inline-block;
 	vertical-align: top;
 }
+.newNoteField {
+    margin-top: 1em;
+}
 .newNoteFieldLabel {
 	width: 10em;
 	margin-right:1em;
 	display:inline-block;
 	text-align:right;
 }
-
+.newNoteEmailFields {
+    text-align: center;
+    margin-bottom:1em;
+}
+.noteRedFlag, .noteGreenFlag {
+    cursor:pointer;
+}
 /* STUDENT DISCIPLINE */
 #disciplineChart {
 	padding:5em;
@@ -311,4 +324,10 @@
 }
 .fr {
 	float:right;
+}
+
+.disciplineChartTitle {
+    font-size:16px;
+    padding-top:2em;
+    text-align:center;
 }
